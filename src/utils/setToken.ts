@@ -10,7 +10,7 @@ export const setToken = (userId: string, res: Response) => {
     httpOnly: true,
     domain:
       process.env.NODE_ENV === "production"
-        ? "sections1.vercel.app"
+        ? ".sections1.vercel.app"
         : undefined,
   });
 };
