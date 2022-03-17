@@ -16,4 +16,6 @@ export class User {
   twitterAccessToken: string | null;
   @Field(() => String, { nullable: true })
   twitterId: string | null;
+  @Field(() => String, { nullable: true })
+  token?: string;
 }

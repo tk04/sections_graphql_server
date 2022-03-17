@@ -41,6 +41,10 @@ __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "twitterId", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "token", void 0);
 User = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], User);

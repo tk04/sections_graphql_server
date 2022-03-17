@@ -164,8 +164,14 @@ let UserResolver = class UserResolver {
                     password: await argon2_1.default.hash(input.password),
                 },
             });
-            (0, setToken_1.setToken)(user.id, res);
-            return user;
+            const token = (0, setToken_1.setToken)(user.id, res);
+            const response = {
+                token,
+                ...user,
+                twitter: !!user.twitterId,
+                google: !!user.googleId,
+            };
+            return response;
         }
         catch (e) {
             return {
@@ -189,8 +195,9 @@ let UserResolver = class UserResolver {
                     throw new Error("Could not login user");
                 }
                 else {
-                    (0, setToken_1.setToken)(user.id, res);
+                    const token = (0, setToken_1.setToken)(user.id, res);
                     const response = {
+                        token,
                         ...user,
                         twitter: !!user.twitterId,
                         google: !!user.googleId,
@@ -212,8 +219,9 @@ let UserResolver = class UserResolver {
     async signInWithGoogle(code, { prisma, res }) {
         try {
             const user = await (0, GoogleLogin_1.GoogleLogin)(code, prisma);
-            (0, setToken_1.setToken)(user.id, res);
+            const token = (0, setToken_1.setToken)(user.id, res);
             const response = {
+                token,
                 ...user,
                 twitter: !!user.twitterId,
                 google: !!user.googleId,
@@ -232,9 +240,10 @@ let UserResolver = class UserResolver {
             const user = await (0, TwitterLogin_1.TwitterLogin)(code, prisma).catch((e) => {
                 throw new Error(e.message);
             });
-            (0, setToken_1.setToken)(user.id, res);
+            const token = (0, setToken_1.setToken)(user.id, res);
             if (user) {
                 const response = {
+                    token,
                     ...user,
                     twitter: !!user.twitterId,
                     google: !!user.googleId,
