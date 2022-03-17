@@ -3,18 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require("reflect-metadata");
-const type_graphql_1 = require("type-graphql");
-const express_1 = __importDefault(require("express"));
-const apollo_server_express_1 = require("apollo-server-express");
-const apollo_server_core_1 = require("apollo-server-core");
-const User_1 = require("./resolvers/User");
 const client_1 = require("@prisma/client");
-require("dotenv/config");
+const apollo_server_core_1 = require("apollo-server-core");
+const apollo_server_express_1 = require("apollo-server-express");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const cors_1 = __importDefault(require("cors"));
-const Tweet_1 = require("./resolvers/Tweet");
+require("dotenv/config");
+const express_1 = __importDefault(require("express"));
 const redis_1 = require("redis");
+require("reflect-metadata");
+const type_graphql_1 = require("type-graphql");
+const Tweet_1 = require("./resolvers/Tweet");
+const User_1 = require("./resolvers/User");
 const main = async () => {
     const app = (0, express_1.default)();
     const redis = (0, redis_1.createClient)({
@@ -35,6 +35,7 @@ const main = async () => {
         app,
         cors: { origin: "http://localhost:3000", credentials: true },
     });
-    app.listen(4000);
+    console.log("PORT: " + process.env.PORT);
+    app.listen(process.env.PORT);
 };
 main();
