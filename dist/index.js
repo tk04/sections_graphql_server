@@ -29,13 +29,17 @@ const main = async () => {
         plugins: [(0, apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground)()],
         schema: await (0, type_graphql_1.buildSchema)({ resolvers: [User_1.UserResolver, Tweet_1.TweetResolver] }),
         context: ({ req, res }) => ({ req, res, prisma, redis }),
+        introspection: true,
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({
         app,
-        cors: { origin: "http://localhost:3000", credentials: true },
+        cors: {
+            origin: ["http://localhost:3000", "https://sections1.vercel.app/"],
+            credentials: true,
+        },
     });
     console.log("PORT: " + process.env.PORT);
-    app.listen(process.env.PORT);
+    app.listen(process.env.PORT || 4000);
 };
 main();
