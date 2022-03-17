@@ -10,8 +10,8 @@ export const GoogleLogin = async (code: string, prisma: PrismaClient) => {
       process.env.GOOGLE_CLIENT_ID
     }&client_secret=${process.env.GOOGLE_CLIENT_SECRET}&redirect_uri=${
       process.env.NODE_ENV == "production"
-        ? "https://sections1.vercel.app"
-        : "http://localhost:3000"
+        ? "https://sections1.vercel.app/cb"
+        : "http://localhost:3000/cb"
     }&grant_type=authorization_code`,
   }).catch((e) => console.log(e));
   let user;
