@@ -175,6 +175,7 @@ let UserResolver = class UserResolver {
             const user = await prisma.user.findFirst({
                 where: { email: input.email.toLowerCase() },
             });
+            console.log("USER: ", user);
             if (!user) {
                 throw new Error("User not found");
             }
