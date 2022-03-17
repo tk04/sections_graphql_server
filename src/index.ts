@@ -1,17 +1,17 @@
-import "reflect-metadata";
-import { buildSchema } from "type-graphql";
-import express from "express";
-import { ApolloServer, gql } from "apollo-server-express";
-import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
-import { UserResolver } from "./resolvers/User";
+import { RedisClientType } from "@node-redis/client";
 import { PrismaClient } from "@prisma/client";
-import "dotenv/config";
+import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import { ApolloServer } from "apollo-server-express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { TweetResolver } from "./resolvers/Tweet";
-
+import "dotenv/config";
+import express from "express";
 import { createClient } from "redis";
-import { RedisClientType } from "@node-redis/client";
+import "reflect-metadata";
+import { buildSchema } from "type-graphql";
+import { TweetResolver } from "./resolvers/Tweet";
+import { UserResolver } from "./resolvers/User";
+
 const main = async () => {
   const app = express();
 
@@ -34,7 +34,8 @@ const main = async () => {
     app,
     cors: { origin: "http://localhost:3000", credentials: true },
   });
-  app.listen(process.env.PORT || 4000);
+  console.log("PORT: " + process.env.PORT);
+  app.listen(process.env.PORT);
 };
 
 main();
