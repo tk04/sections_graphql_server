@@ -13,7 +13,9 @@ const TwitterLogin = async (code, prisma) => {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            data: `code=${code}&grant_type=authorization_code&redirect_uri=http://localhost:3000/twitter_cb&code_verifier=challenge&client_id=${process.env.TWITTER_CLIENT_ID}`,
+            data: `code=${code}&grant_type=authorization_code&redirect_uri=${process.env.NODE_ENV == "production"
+                ? "https://sections1.vercel.app"
+                : "http://localhost:3000"}/twitter_cb&code_verifier=challenge&client_id=${process.env.TWITTER_CLIENT_ID}`,
         });
         if (data.data) {
             const userInfo = await (0, axios_1.default)({

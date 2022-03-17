@@ -8,9 +8,11 @@ export const GoogleLogin = async (code: string, prisma: PrismaClient) => {
     method: "POST",
     data: `code=${code}&client_id=${
       process.env.GOOGLE_CLIENT_ID
-    }&client_secret=${
-      process.env.GOOGLE_CLIENT_SECRET
-    }&redirect_uri=${"http://localhost:3000/cb"}&grant_type=authorization_code`,
+    }&client_secret=${process.env.GOOGLE_CLIENT_SECRET}&redirect_uri=${
+      process.env.NODE_ENV == "production"
+        ? "https://sections1.vercel.app"
+        : "http://localhost:3000"
+    }&grant_type=authorization_code`,
   }).catch((e) => console.log(e));
   let user;
   if (data && data.data && data.data.id_token) {
