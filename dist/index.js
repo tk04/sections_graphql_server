@@ -17,25 +17,11 @@ const Tweet_1 = require("./resolvers/Tweet");
 const redis_1 = require("redis");
 const main = async () => {
     const app = (0, express_1.default)();
-    // let redis: Redis.Redis = new Redis({
-    //   host: process.env.REDIS_HOST,
-    //   // port: 11352,
-    //   password: process.env.REDIS_PASS,
-    // });
     const redis = (0, redis_1.createClient)({
         url: process.env.REDIS_URI,
         password: process.env.REDIS_PASS,
     });
     await redis.connect();
-    // if (process.env.NODE_ENV === "production") {
-    //   redis = new Redis({
-    //     port: 11352, // Redis port
-    //     host: process.env.REDIS_HOST,
-    //     password: process.env.REDIS_PASSWORD,
-    //   });
-    // } else {
-    //   redis = new Redis();
-    // }
     app.use((0, cookie_parser_1.default)(process.env.JWT_SECRET));
     app.use((0, cors_1.default)({ origin: "http://localhost:3000", credentials: true }));
     const prisma = new client_1.PrismaClient();
