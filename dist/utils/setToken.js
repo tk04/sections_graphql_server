@@ -11,7 +11,7 @@ const setToken = (userId, res) => {
     });
     res.cookie("token", token, {
         maxAge: 1000 * 60 * 60 * 24 * 30,
-        secure: process.env.NODE_ENV === "production",
+        secure: false,
         httpOnly: true,
     });
 };
