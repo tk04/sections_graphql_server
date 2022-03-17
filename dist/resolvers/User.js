@@ -108,8 +108,8 @@ let UserResolver = class UserResolver {
     hello() {
         return "Hello World";
     }
-    async me({ req, prisma }) {
-        const token = req.cookies.token;
+    async me({ req, prisma }, token) {
+        // const token = req.cookies.token;
         console.log("TOKEN: ", token);
         console.log("cookies: ", req.cookies);
         if (token) {
@@ -271,8 +271,9 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Query)(() => FullUser, { nullable: true }),
     __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("token", () => String)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "me", null);
 __decorate([

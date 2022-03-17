@@ -73,8 +73,11 @@ export class UserResolver {
     return "Hello World";
   }
   @Query(() => FullUser, { nullable: true })
-  async me(@Ctx() { req, prisma }: context) {
-    const token = req.cookies.token;
+  async me(
+    @Ctx() { req, prisma }: context,
+    @Arg("token", () => String) token: string
+  ) {
+    // const token = req.cookies.token;
     console.log("TOKEN: ", token);
     console.log("cookies: ", req.cookies);
     if (token) {
