@@ -84,13 +84,13 @@ export class UserResolver {
       const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
         userId: string;
       };
-      console.log("DECODED TOKEN: ", userId);
+      // console.log("DECODED TOKEN: ", userId);
       const user = await prisma.user.findFirst({
         where: {
           id: userId,
         },
       });
-      console.log("USER: ", user);
+      // console.log("USER: ", user);
       // response.google = !!user.googleId;
       if (user) {
         const response: FullUser = {
@@ -169,7 +169,7 @@ export class UserResolver {
       const user = await prisma.user.findFirst({
         where: { email: input.email.toLowerCase() },
       });
-      console.log("USER: ", user);
+      // console.log("USER: ", user);
       if (!user) {
         throw new Error("User not found");
       }
@@ -244,6 +244,7 @@ export class UserResolver {
         throw new Error("user not found");
       }
     } catch (e) {
+      console.log("ERROR: ", e);
       return {
         path: "Twitter Login",
         message: "Could not authenticate with Twitter",
