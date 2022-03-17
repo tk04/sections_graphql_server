@@ -111,6 +111,7 @@ let UserResolver = class UserResolver {
     async me({ req, prisma }) {
         const token = req.cookies.token;
         console.log("TOKEN: ", token);
+        console.log("cookies: ", req.cookies);
         if (token) {
             const { userId } = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             console.log("DECODED TOKEN: ", userId);

@@ -76,6 +76,7 @@ export class UserResolver {
   async me(@Ctx() { req, prisma }: context) {
     const token = req.cookies.token;
     console.log("TOKEN: ", token);
+    console.log("cookies: ", req.cookies);
     if (token) {
       const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
         userId: string;

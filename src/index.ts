@@ -24,11 +24,14 @@ const main = async () => {
   app.use(cookieParser(process.env.JWT_SECRET));
   app.use(
     cors({
-      origin: "https://sections1.vercel.app" /* "http://localhost:3000" */,
+      origin:
+        process.env.NODE_ENV == "production"
+          ? "https://sections1.vercel.app"
+          : "http://localhost:3000",
       credentials: true,
     })
   );
-  app.set("trust proxy", 1);
+  app.set("trust proxy", true);
   const prisma = new PrismaClient();
   const apolloServer = new ApolloServer({
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
@@ -40,11 +43,14 @@ const main = async () => {
   apolloServer.applyMiddleware({
     app,
     cors: {
-      origin: "https://sections1.vercel.app",
+      origin:
+        process.env.NODE_ENV == "production"
+          ? "https://sections1.vercel.app"
+          : "http://localhost:3000",
       credentials: true,
     },
   });
-  console.log("PORT: " + process.env.PORT);
+
   app.listen(process.env.PORT || 4000);
 };
 
