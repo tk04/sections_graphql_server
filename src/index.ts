@@ -34,7 +34,7 @@ const main = async () => {
     app,
     cors: { origin: "http://localhost:3000", credentials: true },
   });
-  app.listen(4000);
+  app.listen(process.env.PORT || 4000);
 };
 
 main();
