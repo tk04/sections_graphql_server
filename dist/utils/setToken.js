@@ -14,7 +14,7 @@ const setToken = (userId, res) => {
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
         domain: process.env.NODE_ENV === "production"
-            ? ".sections1.vercel.app"
+            ? ".vercel.app"
             : undefined,
     });
 };
