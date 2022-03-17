@@ -28,6 +28,7 @@ const main = async () => {
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
     schema: await buildSchema({ resolvers: [UserResolver, TweetResolver] }),
     context: ({ req, res }) => ({ req, res, prisma, redis }),
+    introspection: true,
   });
   await apolloServer.start();
   apolloServer.applyMiddleware({
