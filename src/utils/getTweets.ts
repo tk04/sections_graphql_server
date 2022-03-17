@@ -1,7 +1,7 @@
 import { Tweets } from "@prisma/client";
 import axios from "axios";
 import { Tweet } from "../entities/Tweet";
-import { Redis } from "ioredis";
+import { RedisClientType } from "@node-redis/client";
 // const getTweets = async (tweets: Tweets[]) => {
 //   const result = await Promise.all(
 //     tweets.map(async (tweet) => {
@@ -14,7 +14,10 @@ import { Redis } from "ioredis";
 
 //   return result;
 // };
-export const getTweetsHelper = async (tweets: Tweets[], redis: Redis) => {
+export const getTweetsHelper = async (
+  tweets: Tweets[],
+  redis: RedisClientType
+) => {
   try {
     const access_token = process.env.TWITTER_ACCESS_TOKEN;
 
@@ -66,12 +69,8 @@ export const getTweetsHelper = async (tweets: Tweets[], redis: Redis) => {
           pollOptions,
           media: tweetRes.data.includes.media,
         };
-        redis.set(
-          `tweet:${url}`,
-          JSON.stringify(response),
-          "ex",
-          60 * 60 * 24 * 5
-        ); // 5 days
+        redis.set(`tweet:${url}`, JSON.stringify(response));
+        redis.expire(`tweet:${url}`, 60 * 60 * 24 * 5); // 5 days
         return response;
       })
     );

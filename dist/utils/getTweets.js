@@ -52,7 +52,8 @@ const getTweetsHelper = async (tweets, redis) => {
                 pollOptions,
                 media: tweetRes.data.includes.media,
             };
-            redis.set(`tweet:${url}`, JSON.stringify(response), "ex", 60 * 60 * 24 * 5); // 5 days
+            redis.set(`tweet:${url}`, JSON.stringify(response));
+            redis.expire(`tweet:${url}`, 60 * 60 * 24 * 5); // 5 days
             return response;
         }));
         // console.log("RESULTS", results);

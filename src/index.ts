@@ -9,10 +9,18 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { TweetResolver } from "./resolvers/Tweet";
-import Redis from "ioredis";
+
+import { createClient } from "redis";
+import { RedisClientType } from "@node-redis/client";
 const main = async () => {
   const app = express();
-  const redis = new Redis();
+
+  const redis: RedisClientType = createClient({
+    url: process.env.REDIS_URI,
+    password: process.env.REDIS_PASS,
+  });
+  await redis.connect();
+
   app.use(cookieParser(process.env.JWT_SECRET));
   app.use(cors({ origin: "http://localhost:3000", credentials: true }));
   const prisma = new PrismaClient();
