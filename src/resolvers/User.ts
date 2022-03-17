@@ -78,8 +78,7 @@ export class UserResolver {
     @Arg("token", () => String) token: string
   ) {
     // const token = req.cookies.token;
-    console.log("TOKEN: ", token);
-    console.log("cookies: ", req.cookies);
+
     if (token) {
       const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
         userId: string;
@@ -107,14 +106,18 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponse)
-  @UseMiddleware(auth)
+  // @UseMiddleware(auth)
   async updateMe(
     @Ctx() { prisma, req }: context,
-    @Arg("input") input: updateInput
+    @Arg("input") input: updateInput,
+    @Arg("token", () => String) token: string
   ) {
     try {
+      const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
+        userId: string;
+      };
       const user = await prisma.user.update({
-        where: { id: req!.user!.id },
+        where: { id: userId },
         data: input,
       });
       const response: FullUser = {

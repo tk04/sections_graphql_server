@@ -21,7 +21,6 @@ require("dotenv/config");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const type_graphql_1 = require("type-graphql");
 const user_1 = require("../entities/user");
-const auth_1 = require("../middleware/auth");
 const GoogleLogin_1 = require("../utils/GoogleLogin");
 const setToken_1 = require("../utils/setToken");
 const TwitterLogin_1 = require("../utils/TwitterLogin");
@@ -110,8 +109,6 @@ let UserResolver = class UserResolver {
     }
     async me({ req, prisma }, token) {
         // const token = req.cookies.token;
-        console.log("TOKEN: ", token);
-        console.log("cookies: ", req.cookies);
         if (token) {
             const { userId } = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             // console.log("DECODED TOKEN: ", userId);
@@ -135,10 +132,12 @@ let UserResolver = class UserResolver {
             }
         }
     }
-    async updateMe({ prisma, req }, input) {
+    // @UseMiddleware(auth)
+    async updateMe({ prisma, req }, input, token) {
         try {
+            const { userId } = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             const user = await prisma.user.update({
-                where: { id: req.user.id },
+                where: { id: userId },
                 data: input,
             });
             const response = {
@@ -279,11 +278,11 @@ __decorate([
 ], UserResolver.prototype, "me", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
-    (0, type_graphql_1.UseMiddleware)(auth_1.auth),
     __param(0, (0, type_graphql_1.Ctx)()),
     __param(1, (0, type_graphql_1.Arg)("input")),
+    __param(2, (0, type_graphql_1.Arg)("token", () => String)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, updateInput]),
+    __metadata("design:paramtypes", [Object, updateInput, String]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "updateMe", null);
 __decorate([
