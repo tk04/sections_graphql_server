@@ -6,11 +6,11 @@ export const setToken = (userId: string, res: Response) => {
   });
   res.cookie("token", token, {
     maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-    secure: false, // process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     domain:
       process.env.NODE_ENV === "production"
-        ? "sections1.vercel.app"
+        ? ".sections1.vercel.app"
         : undefined,
   });
 };

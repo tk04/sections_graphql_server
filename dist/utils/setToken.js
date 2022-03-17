@@ -11,10 +11,10 @@ const setToken = (userId, res) => {
     });
     res.cookie("token", token, {
         maxAge: 1000 * 60 * 60 * 24 * 30,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         httpOnly: true,
         domain: process.env.NODE_ENV === "production"
-            ? "sections1.vercel.app"
+            ? ".sections1.vercel.app"
             : undefined,
     });
 };
