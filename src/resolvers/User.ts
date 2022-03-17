@@ -75,16 +75,18 @@ export class UserResolver {
   @Query(() => FullUser, { nullable: true })
   async me(@Ctx() { req, prisma }: context) {
     const token = req.cookies.token;
+    console.log("TOKEN: ", token);
     if (token) {
       const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
         userId: string;
       };
+      console.log("DECODED TOKEN: ", userId);
       const user = await prisma.user.findFirst({
         where: {
           id: userId,
         },
       });
-
+      console.log("USER: ", user);
       // response.google = !!user.googleId;
       if (user) {
         const response: FullUser = {

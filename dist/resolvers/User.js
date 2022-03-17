@@ -110,13 +110,16 @@ let UserResolver = class UserResolver {
     }
     async me({ req, prisma }) {
         const token = req.cookies.token;
+        console.log("TOKEN: ", token);
         if (token) {
             const { userId } = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+            console.log("DECODED TOKEN: ", userId);
             const user = await prisma.user.findFirst({
                 where: {
                     id: userId,
                 },
             });
+            console.log("USER: ", user);
             // response.google = !!user.googleId;
             if (user) {
                 const response = {
