@@ -27,6 +27,7 @@ const main = async () => {
         origin: "https://sections1.vercel.app" /* "http://localhost:3000" */,
         credentials: true,
     }));
+    app.set("trust proxy", 1);
     const prisma = new client_1.PrismaClient();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         plugins: [(0, apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground)()],

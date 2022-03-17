@@ -28,6 +28,7 @@ const main = async () => {
       credentials: true,
     })
   );
+  app.set("trust proxy", 1);
   const prisma = new PrismaClient();
   const apolloServer = new ApolloServer({
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
