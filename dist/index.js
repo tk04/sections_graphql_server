@@ -35,7 +35,7 @@ const main = async () => {
     apolloServer.applyMiddleware({
         app,
         cors: {
-            origin: ["http://localhost:3000", "https://sections1.vercel.app/"],
+            origin: "https://sections1.vercel.app/",
             credentials: true,
         },
     });
