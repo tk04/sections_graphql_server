@@ -30,6 +30,12 @@ const main = async () => {
         credentials: true,
     }));
     app.set("trust proxy", true);
+    // app.use((req, res, next) => {
+    //   res.setHeader("Access-Control-Allow-Credentials", "true");
+    //   res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+    //   res.setHeader("Access-Control-Allow-Headers", "Content-Type, *");
+    //   next();
+    // });
     const prisma = new client_1.PrismaClient();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         plugins: [(0, apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground)()],
