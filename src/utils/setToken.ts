@@ -5,7 +5,7 @@ export const setToken = (userId: string, res: Response) => {
     expiresIn: "30d",
   });
 
-  res.cookie("token", token, {
+  res.cookie("session", token, {
     maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
