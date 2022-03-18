@@ -13,9 +13,11 @@ const setToken = (userId, res) => {
         maxAge: 1000 * 60 * 60 * 24 * 30,
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
-        domain: process.env.NODE_ENV === "production"
-            ? "sections-be.herokuapp.com"
-            : undefined,
+        sameSite: "none",
+        // domain:
+        //   process.env.NODE_ENV === "production"
+        //     ? "sections-be.herokuapp.com"
+        //     : undefined,
     });
     return token;
 };
