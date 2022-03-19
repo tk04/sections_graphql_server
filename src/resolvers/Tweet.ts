@@ -11,7 +11,6 @@ import {
 } from "type-graphql";
 import { Tweet } from "../entities/Tweet";
 import { auth } from "../middleware/auth";
-import { getUserFromToken } from "../middleware/getUserFromToken";
 import { context } from "../types/types";
 import { getTweetsHelper } from "../utils/getTweets";
 export type TweetsCreateManyInput = {
@@ -30,15 +29,11 @@ class TweetInput {
 @Resolver()
 export class TweetResolver {
   @Query(() => [Tweet])
-  // @UseMiddleware(auth)
-  async getMyTweets(
-    @Ctx() { req, prisma, redis }: context,
-    @Arg("token") token: string
-  ) {
+  @UseMiddleware(auth)
+  async getMyTweets(@Ctx() { req, prisma, redis }: context) {
     try {
-      const user = await getUserFromToken(token, prisma);
       const tweets = await prisma.tweets.findMany({
-        where: { userId: user!.id },
+        where: { userId: req.user!.id },
       });
 
       const result = await getTweetsHelper(tweets, redis);
@@ -64,16 +59,14 @@ export class TweetResolver {
   }
 
   @Mutation(() => Boolean)
-  // @UseMiddleware(auth)
+  @UseMiddleware(auth)
   async addTweets(
     @Arg("tweetURLs", () => [String]) tweetURLs: string[],
-    @Ctx() { req, prisma }: context,
-    @Arg("token") token: string
+    @Ctx() { req, prisma }: context
   ) {
     try {
-      const user = await getUserFromToken(token, prisma);
       const modTweets = tweetURLs.map((tweet) => {
-        return { tweet: tweet.split("?")[0], userId: user!.id };
+        return { tweet: tweet.split("?")[0], userId: req.user!.id };
       });
       await prisma.tweets.createMany({
         data: modTweets as TweetsCreateManyInput[],
@@ -138,16 +131,14 @@ export class TweetResolver {
   }
 
   @Mutation(() => String)
-  // @UseMiddleware(auth)
+  @UseMiddleware(auth)
   async deleteTweet(
     @Arg("url") url: string,
-    @Ctx() { req, prisma, redis }: context,
-    @Arg("token") token: string
+    @Ctx() { req, prisma, redis }: context
   ) {
     try {
-      const user = await getUserFromToken(token, prisma);
       const tweet = await prisma.tweets.findFirst({
-        where: { tweet: url, userId: user!.id },
+        where: { tweet: url, userId: req.user!.id },
       });
       if (!tweet) {
         return true;

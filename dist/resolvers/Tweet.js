@@ -19,7 +19,7 @@ exports.TweetResolver = void 0;
 const axios_1 = __importDefault(require("axios"));
 const type_graphql_1 = require("type-graphql");
 const Tweet_1 = require("../entities/Tweet");
-const getUserFromToken_1 = require("../middleware/getUserFromToken");
+const auth_1 = require("../middleware/auth");
 const getTweets_1 = require("../utils/getTweets");
 let TweetInput = class TweetInput {
 };
@@ -35,12 +35,10 @@ TweetInput = __decorate([
     (0, type_graphql_1.InputType)()
 ], TweetInput);
 let TweetResolver = class TweetResolver {
-    // @UseMiddleware(auth)
-    async getMyTweets({ req, prisma, redis }, token) {
+    async getMyTweets({ req, prisma, redis }) {
         try {
-            const user = await (0, getUserFromToken_1.getUserFromToken)(token, prisma);
             const tweets = await prisma.tweets.findMany({
-                where: { userId: user.id },
+                where: { userId: req.user.id },
             });
             const result = await (0, getTweets_1.getTweetsHelper)(tweets, redis);
             return result;
@@ -61,12 +59,10 @@ let TweetResolver = class TweetResolver {
             console.log("ERROR: ", e);
         }
     }
-    // @UseMiddleware(auth)
-    async addTweets(tweetURLs, { req, prisma }, token) {
+    async addTweets(tweetURLs, { req, prisma }) {
         try {
-            const user = await (0, getUserFromToken_1.getUserFromToken)(token, prisma);
             const modTweets = tweetURLs.map((tweet) => {
-                return { tweet: tweet.split("?")[0], userId: user.id };
+                return { tweet: tweet.split("?")[0], userId: req.user.id };
             });
             await prisma.tweets.createMany({
                 data: modTweets,
@@ -115,12 +111,10 @@ let TweetResolver = class TweetResolver {
             return "error";
         }
     }
-    // @UseMiddleware(auth)
-    async deleteTweet(url, { req, prisma, redis }, token) {
+    async deleteTweet(url, { req, prisma, redis }) {
         try {
-            const user = await (0, getUserFromToken_1.getUserFromToken)(token, prisma);
             const tweet = await prisma.tweets.findFirst({
-                where: { tweet: url, userId: user.id },
+                where: { tweet: url, userId: req.user.id },
             });
             if (!tweet) {
                 return true;
@@ -152,10 +146,10 @@ let TweetResolver = class TweetResolver {
 };
 __decorate([
     (0, type_graphql_1.Query)(() => [Tweet_1.Tweet]),
+    (0, type_graphql_1.UseMiddleware)(auth_1.auth),
     __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("token")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TweetResolver.prototype, "getMyTweets", null);
 __decorate([
@@ -168,11 +162,11 @@ __decorate([
 ], TweetResolver.prototype, "getTweets", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.UseMiddleware)(auth_1.auth),
     __param(0, (0, type_graphql_1.Arg)("tweetURLs", () => [String])),
     __param(1, (0, type_graphql_1.Ctx)()),
-    __param(2, (0, type_graphql_1.Arg)("token")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array, Object, String]),
+    __metadata("design:paramtypes", [Array, Object]),
     __metadata("design:returntype", Promise)
 ], TweetResolver.prototype, "addTweets", null);
 __decorate([
@@ -184,11 +178,11 @@ __decorate([
 ], TweetResolver.prototype, "getTweet", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => String),
+    (0, type_graphql_1.UseMiddleware)(auth_1.auth),
     __param(0, (0, type_graphql_1.Arg)("url")),
     __param(1, (0, type_graphql_1.Ctx)()),
-    __param(2, (0, type_graphql_1.Arg)("token")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], TweetResolver.prototype, "deleteTweet", null);
 __decorate([

@@ -21,6 +21,7 @@ require("dotenv/config");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const type_graphql_1 = require("type-graphql");
 const user_1 = require("../entities/user");
+const auth_1 = require("../middleware/auth");
 const GoogleLogin_1 = require("../utils/GoogleLogin");
 const setToken_1 = require("../utils/setToken");
 const TwitterLogin_1 = require("../utils/TwitterLogin");
@@ -107,19 +108,15 @@ let UserResolver = class UserResolver {
     hello() {
         return "Hello World";
     }
-    async me({ req, prisma }, token) {
-        const session = req.cookies.session;
-        console.log("COOKIES: ", req.cookies);
-        console.log("TOKEN: ", session);
+    async me({ req, prisma }) {
+        const token = req.cookies.token;
         if (token) {
             const { userId } = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-            // console.log("DECODED TOKEN: ", userId);
             const user = await prisma.user.findFirst({
                 where: {
                     id: userId,
                 },
             });
-            // console.log("USER: ", user);
             // response.google = !!user.googleId;
             if (user) {
                 const response = {
@@ -134,12 +131,10 @@ let UserResolver = class UserResolver {
             }
         }
     }
-    // @UseMiddleware(auth)
-    async updateMe({ prisma, req }, input, token) {
+    async updateMe({ prisma, req }, input) {
         try {
-            const { userId } = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             const user = await prisma.user.update({
-                where: { id: userId },
+                where: { id: req.user.id },
                 data: input,
             });
             const response = {
@@ -165,14 +160,8 @@ let UserResolver = class UserResolver {
                     password: await argon2_1.default.hash(input.password),
                 },
             });
-            const token = (0, setToken_1.setToken)(user.id, res);
-            const response = {
-                token,
-                ...user,
-                twitter: !!user.twitterId,
-                google: !!user.googleId,
-            };
-            return response;
+            (0, setToken_1.setToken)(user.id, res);
+            return user;
         }
         catch (e) {
             return {
@@ -186,7 +175,6 @@ let UserResolver = class UserResolver {
             const user = await prisma.user.findFirst({
                 where: { email: input.email.toLowerCase() },
             });
-            // console.log("USER: ", user);
             if (!user) {
                 throw new Error("User not found");
             }
@@ -196,9 +184,8 @@ let UserResolver = class UserResolver {
                     throw new Error("Could not login user");
                 }
                 else {
-                    const token = (0, setToken_1.setToken)(user.id, res);
+                    (0, setToken_1.setToken)(user.id, res);
                     const response = {
-                        token,
                         ...user,
                         twitter: !!user.twitterId,
                         google: !!user.googleId,
@@ -220,9 +207,8 @@ let UserResolver = class UserResolver {
     async signInWithGoogle(code, { prisma, res }) {
         try {
             const user = await (0, GoogleLogin_1.GoogleLogin)(code, prisma);
-            const token = (0, setToken_1.setToken)(user.id, res);
+            (0, setToken_1.setToken)(user.id, res);
             const response = {
-                token,
                 ...user,
                 twitter: !!user.twitterId,
                 google: !!user.googleId,
@@ -241,10 +227,9 @@ let UserResolver = class UserResolver {
             const user = await (0, TwitterLogin_1.TwitterLogin)(code, prisma).catch((e) => {
                 throw new Error(e.message);
             });
-            const token = (0, setToken_1.setToken)(user.id, res);
+            (0, setToken_1.setToken)(user.id, res);
             if (user) {
                 const response = {
-                    token,
                     ...user,
                     twitter: !!user.twitterId,
                     google: !!user.googleId,
@@ -256,7 +241,6 @@ let UserResolver = class UserResolver {
             }
         }
         catch (e) {
-            console.log("ERROR: ", e);
             return {
                 path: "Twitter Login",
                 message: "Could not authenticate with Twitter",
@@ -273,18 +257,17 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Query)(() => FullUser, { nullable: true }),
     __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("token", () => String)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "me", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
+    (0, type_graphql_1.UseMiddleware)(auth_1.auth),
     __param(0, (0, type_graphql_1.Ctx)()),
     __param(1, (0, type_graphql_1.Arg)("input")),
-    __param(2, (0, type_graphql_1.Arg)("token", () => String)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, updateInput, String]),
+    __metadata("design:paramtypes", [Object, updateInput]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "updateMe", null);
 __decorate([

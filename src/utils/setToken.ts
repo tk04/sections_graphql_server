@@ -5,15 +5,14 @@ export const setToken = (userId: string, res: Response) => {
     expiresIn: "30d",
   });
 
-  res.cookie("session", token, {
+  res.cookie("token2", token, {
     maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    sameSite: "none",
-    domain:
-      process.env.NODE_ENV === "production"
-        ? "sections-be.herokuapp.com"
-        : undefined,
   });
-  return token;
+  res.cookie("token", token, {
+    maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+  });
 };

@@ -73,25 +73,18 @@ export class UserResolver {
     return "Hello World";
   }
   @Query(() => FullUser, { nullable: true })
-  async me(
-    @Ctx() { req, prisma }: context,
-    @Arg("token", () => String) token: string
-  ) {
-    const session = req.cookies.session;
-    console.log("COOKIES: ", req.cookies);
-    console.log("TOKEN: ", session);
-
+  async me(@Ctx() { req, prisma }: context) {
+    const token = req.cookies.token;
     if (token) {
       const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
         userId: string;
       };
-      // console.log("DECODED TOKEN: ", userId);
       const user = await prisma.user.findFirst({
         where: {
           id: userId,
         },
       });
-      // console.log("USER: ", user);
+
       // response.google = !!user.googleId;
       if (user) {
         const response: FullUser = {
@@ -108,18 +101,14 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponse)
-  // @UseMiddleware(auth)
+  @UseMiddleware(auth)
   async updateMe(
     @Ctx() { prisma, req }: context,
-    @Arg("input") input: updateInput,
-    @Arg("token", () => String) token: string
+    @Arg("input") input: updateInput
   ) {
     try {
-      const { userId } = jwt.verify(token, process.env.JWT_SECRET!) as {
-        userId: string;
-      };
       const user = await prisma.user.update({
-        where: { id: userId },
+        where: { id: req!.user!.id },
         data: input,
       });
       const response: FullUser = {
@@ -150,14 +139,9 @@ export class UserResolver {
           password: await argon2.hash(input.password),
         },
       });
-      const token = setToken(user.id, res);
-      const response: FullUser = {
-        token,
-        ...user,
-        twitter: !!user.twitterId,
-        google: !!user.googleId,
-      };
-      return response;
+      setToken(user.id, res);
+
+      return user;
     } catch (e) {
       return {
         path: "email",
@@ -174,7 +158,6 @@ export class UserResolver {
       const user = await prisma.user.findFirst({
         where: { email: input.email.toLowerCase() },
       });
-      // console.log("USER: ", user);
       if (!user) {
         throw new Error("User not found");
       }
@@ -184,9 +167,8 @@ export class UserResolver {
         if (!valid) {
           throw new Error("Could not login user");
         } else {
-          const token = setToken(user.id, res);
+          setToken(user.id, res);
           const response: FullUser = {
-            token,
             ...user,
             twitter: !!user.twitterId,
             google: !!user.googleId,
@@ -211,9 +193,8 @@ export class UserResolver {
   ) {
     try {
       const user = await GoogleLogin(code, prisma);
-      const token = setToken(user!.id, res);
+      setToken(user!.id, res);
       const response: FullUser = {
-        token,
         ...user,
         twitter: !!user.twitterId,
         google: !!user.googleId,
@@ -236,10 +217,9 @@ export class UserResolver {
       const user = await TwitterLogin(code, prisma).catch((e) => {
         throw new Error(e.message);
       });
-      const token = setToken(user!.id, res);
+      setToken(user!.id, res);
       if (user) {
         const response: FullUser = {
-          token,
           ...user,
           twitter: !!user.twitterId,
           google: !!user.googleId,
@@ -249,7 +229,6 @@ export class UserResolver {
         throw new Error("user not found");
       }
     } catch (e) {
-      console.log("ERROR: ", e);
       return {
         path: "Twitter Login",
         message: "Could not authenticate with Twitter",
