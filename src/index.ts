@@ -26,7 +26,7 @@ const main = async () => {
     cors({
       origin:
         process.env.NODE_ENV == "production"
-          ? "sections-be.herokuapp.com"
+          ? "https://sections1.vercel.app"
           : "http://localhost:3000",
       credentials: true,
     })
