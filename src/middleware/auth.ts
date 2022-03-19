@@ -9,11 +9,11 @@ export const auth: MiddlewareFn<context> = async ({ context }, next) => {
     try {
       const userId = (jwt.decode(token) as jwt.JwtPayload & { userId: string })
         .userId;
-      console.log("DECODED USERID: ", userId);
+
       const user = await prisma.user.findFirst({
         where: { id: userId },
       });
-      console.log("USER: ", user);
+
       if (!user) {
         throw new Error("User not found");
       }
