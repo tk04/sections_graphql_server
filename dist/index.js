@@ -7,7 +7,6 @@ const client_1 = require("@prisma/client");
 const apollo_server_core_1 = require("apollo-server-core");
 const apollo_server_express_1 = require("apollo-server-express");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const cors_1 = __importDefault(require("cors"));
 require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const redis_1 = require("redis");
@@ -23,19 +22,7 @@ const main = async () => {
     });
     await redis.connect();
     app.use((0, cookie_parser_1.default)(process.env.JWT_SECRET));
-    app.use((0, cors_1.default)({
-        origin: process.env.NODE_ENV == "production"
-            ? "https://sections1.vercel.app"
-            : "http://localhost:3000",
-        credentials: true,
-    }));
     app.set("trust proxy", true);
-    // app.use((req, res, next) => {
-    //   res.setHeader("Access-Control-Allow-Credentials", "true");
-    //   res.setHeader("Access-Control-Allow-Methods", "GET, POST");
-    //   res.setHeader("Access-Control-Allow-Headers", "Content-Type, *");
-    //   next();
-    // });
     const prisma = new client_1.PrismaClient();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         plugins: [(0, apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground)()],
@@ -46,12 +33,6 @@ const main = async () => {
     await apolloServer.start();
     apolloServer.applyMiddleware({
         app,
-        cors: {
-            origin: process.env.NODE_ENV == "production"
-                ? "https://sections1.vercel.app"
-                : "http://localhost:3000",
-            credentials: true,
-        },
     });
     app.listen(process.env.PORT || 4000);
 };
