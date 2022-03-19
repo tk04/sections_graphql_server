@@ -13,11 +13,17 @@ const setToken = (userId, res) => {
         maxAge: 1000 * 60 * 60 * 24 * 30,
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
+        domain: process.env.NODE_ENV === "production"
+            ? "sections1.vercel.app"
+            : undefined,
     });
     res.cookie("token", token, {
         maxAge: 1000 * 60 * 60 * 24 * 30,
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
+        domain: process.env.NODE_ENV === "production"
+            ? "sections1.vercel.app"
+            : undefined,
     });
 };
 exports.setToken = setToken;
