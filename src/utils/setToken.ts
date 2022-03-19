@@ -10,10 +10,10 @@ export const setToken = (userId: string, res: Response) => {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     sameSite: "none",
-    // domain:
-    //   process.env.NODE_ENV === "production"
-    //     ? "sections-be.herokuapp.com"
-    //     : undefined,
+    domain:
+      process.env.NODE_ENV === "production"
+        ? "sections-be.herokuapp.com"
+        : undefined,
   });
   return token;
 };

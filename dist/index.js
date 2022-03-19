@@ -25,7 +25,7 @@ const main = async () => {
     app.use((0, cookie_parser_1.default)(process.env.JWT_SECRET));
     app.use((0, cors_1.default)({
         origin: process.env.NODE_ENV == "production"
-            ? "https://sections1.vercel.app"
+            ? "sections-be.herokuapp.com"
             : "http://localhost:3000",
         credentials: true,
     }));
