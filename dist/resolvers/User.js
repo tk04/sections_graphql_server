@@ -247,6 +247,10 @@ let UserResolver = class UserResolver {
             };
         }
     }
+    logout({ res }) {
+        res.clearCookie("token");
+        return true;
+    }
 };
 __decorate([
     (0, type_graphql_1.Query)(() => String),
@@ -302,6 +306,13 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "signInWithTwitter", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "logout", null);
 UserResolver = __decorate([
     (0, type_graphql_1.Resolver)(user_1.User)
 ], UserResolver);

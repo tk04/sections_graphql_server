@@ -235,4 +235,10 @@ export class UserResolver {
       };
     }
   }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { res }: context) {
+    res.clearCookie("token");
+    return true;
+  }
 }

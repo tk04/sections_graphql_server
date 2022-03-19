@@ -9,14 +9,6 @@ const setToken = (userId, res) => {
     const token = jsonwebtoken_1.default.sign({ userId }, process.env.JWT_SECRET, {
         expiresIn: "30d",
     });
-    res.cookie("token2", token, {
-        maxAge: 1000 * 60 * 60 * 24 * 30,
-        secure: process.env.NODE_ENV === "production",
-        httpOnly: true,
-        domain: process.env.NODE_ENV === "production"
-            ? "sections1.vercel.app"
-            : undefined,
-    });
     res.cookie("token", token, {
         maxAge: 1000 * 60 * 60 * 24 * 30,
         secure: process.env.NODE_ENV === "production",
