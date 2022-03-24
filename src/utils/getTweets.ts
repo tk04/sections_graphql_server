@@ -1,4 +1,4 @@
-import { Tweets } from "@prisma/client";
+import { PrismaClient, Tweets } from "@prisma/client";
 import axios from "axios";
 import { Tweet } from "../entities/Tweet";
 import { RedisClientType } from "@node-redis/client";
@@ -16,7 +16,8 @@ import { RedisClientType } from "@node-redis/client";
 // };
 export const getTweetsHelper = async (
   tweets: Tweets[],
-  redis: RedisClientType
+  redis: RedisClientType,
+  prisma: PrismaClient
 ) => {
   try {
     const access_token = process.env.TWITTER_ACCESS_TOKEN;
@@ -40,43 +41,48 @@ export const getTweetsHelper = async (
           },
         });
 
-        const pollOptions: any[] =
-          tweetRes.data.includes?.polls &&
-          tweetRes.data.includes?.polls[0].options;
+        if (!tweetRes.data.errors) {
+          const pollOptions: any[] =
+            tweetRes.data.includes?.polls &&
+            tweetRes.data.includes?.polls[0].options;
 
-        const tweet = tweetRes.data.data;
+          const tweet = tweetRes.data.data;
+          const {
+            text,
+            id,
+            public_metrics: {
+              like_count: likes,
+              retweet_count: retweets,
+              reply_count: replies,
+            },
+          } = tweet;
+          // console.log("TWEET: ", tweet);
 
-        const {
-          text,
-          id,
-          public_metrics: {
-            like_count: likes,
-            retweet_count: retweets,
-            reply_count: replies,
-          },
-        } = tweet;
-        // console.log("TWEET: ", tweet);
-
-        const user = tweetRes.data.includes.users[0];
-        const response = {
-          url: val.tweet.split("?")[0],
-          text,
-          id,
-          likes,
-          user,
-          retweets,
-          replies,
-          pollOptions,
-          media: tweetRes.data.includes.media,
-        };
-        redis.set(`tweet:${url}`, JSON.stringify(response));
-        redis.expire(`tweet:${url}`, 60 * 60 * 24 * 5); // 5 days
-        return response;
+          const user = tweetRes.data.includes.users[0];
+          const response = {
+            url: val.tweet.split("?")[0],
+            text,
+            id,
+            likes,
+            user,
+            retweets,
+            replies,
+            pollOptions,
+            media: tweetRes.data.includes.media,
+          };
+          redis.set(`tweet:${url}`, JSON.stringify(response));
+          redis.expire(`tweet:${url}`, 60 * 60 * 24 * 5); // 5 days
+          return response;
+        } else {
+          // delete tweet from db if it is not found (tweet deleted)
+          await prisma.tweets.delete({ where: { id: val.id } });
+          return null;
+        }
       })
     );
-    // console.log("RESULTS", results);
     return results;
   } catch (e) {
     console.log("ERROR: ", e);
+    return null;
   }
 };

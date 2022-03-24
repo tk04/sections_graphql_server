@@ -40,11 +40,12 @@ let TweetResolver = class TweetResolver {
             const tweets = await prisma.tweets.findMany({
                 where: { userId: req.user.id },
             });
-            const result = await (0, getTweets_1.getTweetsHelper)(tweets, redis);
-            return result;
+            const result = await (0, getTweets_1.getTweetsHelper)(tweets, redis, prisma);
+            return result === null || result === void 0 ? void 0 : result.filter((tweet) => tweet !== null); // return only tweets that are not null (i.e. not deleted);
         }
         catch (e) {
             console.log("ERROR: ", e);
+            return null;
         }
     }
     async getTweets({ prisma, redis }, id) {
@@ -52,11 +53,12 @@ let TweetResolver = class TweetResolver {
             const tweets = await prisma.tweets.findMany({
                 where: { userId: id },
             });
-            const result = await (0, getTweets_1.getTweetsHelper)(tweets, redis);
+            const result = await (0, getTweets_1.getTweetsHelper)(tweets, redis, prisma);
             return result;
         }
         catch (e) {
             console.log("ERROR: ", e);
+            return null;
         }
     }
     async addTweets(tweetURLs, { req, prisma }) {
@@ -86,29 +88,32 @@ let TweetResolver = class TweetResolver {
                     Authorization: `Bearer ${access_token}`,
                 },
             });
-            const pollOptions = ((_a = tweetRes.data.includes) === null || _a === void 0 ? void 0 : _a.polls) &&
-                ((_b = tweetRes.data.includes) === null || _b === void 0 ? void 0 : _b.polls[0].options);
-            const tweet = tweetRes.data.data;
-            const { text, id, attachments, public_metrics: { like_count: likes, retweet_count: retweets, reply_count: replies, }, } = tweet;
-            // console.log(tweetRes.data.includes.media);
-            const user = tweetRes.data.includes.users[0];
-            return {
-                url: url.split("?")[0],
-                text,
-                id,
-                attachments,
-                likes,
-                user,
-                retweets,
-                replies,
-                pollOptions,
-                media: tweetRes.data.includes.media,
-            };
+            // if no errors found, return the tweet, else return null
+            if (!tweetRes.data.errors) {
+                const pollOptions = ((_a = tweetRes.data.includes) === null || _a === void 0 ? void 0 : _a.polls) &&
+                    ((_b = tweetRes.data.includes) === null || _b === void 0 ? void 0 : _b.polls[0].options);
+                const tweet = tweetRes.data.data;
+                const { text, id, attachments, public_metrics: { like_count: likes, retweet_count: retweets, reply_count: replies, }, } = tweet;
+                const user = tweetRes.data.includes.users[0];
+                return {
+                    url: url.split("?")[0],
+                    text,
+                    id,
+                    attachments,
+                    likes,
+                    user,
+                    retweets,
+                    replies,
+                    pollOptions,
+                    media: tweetRes.data.includes.media,
+                };
+            }
+            else {
+                throw new Error("tweet not found");
+            }
         }
         catch (e) {
-            console.log("ERROR: ", e.response.data.errors);
-            console.log("ERROR: ", e.response.data.errors[0].parameters);
-            return "error";
+            return null;
         }
     }
     async deleteTweet(url, { req, prisma, redis }) {
@@ -136,7 +141,7 @@ let TweetResolver = class TweetResolver {
             const tweets = await prisma.tweets.findMany({
                 where: { userId: "f101e13e-863b-4b5b-a23d-62e3874db00e" },
             });
-            const result = await (0, getTweets_1.getTweetsHelper)(tweets, redis);
+            const result = await (0, getTweets_1.getTweetsHelper)(tweets, redis, prisma);
             return result;
         }
         catch (e) {
@@ -145,7 +150,7 @@ let TweetResolver = class TweetResolver {
     }
 };
 __decorate([
-    (0, type_graphql_1.Query)(() => [Tweet_1.Tweet]),
+    (0, type_graphql_1.Query)(() => [Tweet_1.Tweet], { nullable: true }),
     (0, type_graphql_1.UseMiddleware)(auth_1.auth),
     __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
@@ -153,7 +158,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TweetResolver.prototype, "getMyTweets", null);
 __decorate([
-    (0, type_graphql_1.Query)(() => [Tweet_1.Tweet]),
+    (0, type_graphql_1.Query)(() => [Tweet_1.Tweet], { nullable: true }),
     __param(0, (0, type_graphql_1.Ctx)()),
     __param(1, (0, type_graphql_1.Arg)("id")),
     __metadata("design:type", Function),
@@ -170,7 +175,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TweetResolver.prototype, "addTweets", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => Tweet_1.Tweet),
+    (0, type_graphql_1.Mutation)(() => Tweet_1.Tweet, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)("url")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

@@ -28,7 +28,7 @@ class TweetInput {
 
 @Resolver()
 export class TweetResolver {
-  @Query(() => [Tweet])
+  @Query(() => [Tweet], { nullable: true })
   @UseMiddleware(auth)
   async getMyTweets(@Ctx() { req, prisma, redis }: context) {
     try {
@@ -36,25 +36,27 @@ export class TweetResolver {
         where: { userId: req.user!.id },
       });
 
-      const result = await getTweetsHelper(tweets, redis);
+      const result = await getTweetsHelper(tweets, redis, prisma);
 
-      return result;
+      return result?.filter((tweet) => tweet !== null); // return only tweets that are not null (i.e. not deleted);
     } catch (e) {
       console.log("ERROR: ", e);
+      return null;
     }
   }
-  @Query(() => [Tweet])
+  @Query(() => [Tweet], { nullable: true })
   async getTweets(@Ctx() { prisma, redis }: context, @Arg("id") id: string) {
     try {
       const tweets = await prisma.tweets.findMany({
         where: { userId: id },
       });
 
-      const result = await getTweetsHelper(tweets, redis);
+      const result = await getTweetsHelper(tweets, redis, prisma);
 
       return result;
     } catch (e) {
       console.log("ERROR: ", e);
+      return null;
     }
   }
 
@@ -78,7 +80,7 @@ export class TweetResolver {
       return false;
     }
   }
-  @Mutation(() => Tweet)
+  @Mutation(() => Tweet, { nullable: true })
   async getTweet(@Arg("url") url: string) {
     try {
       const access_token = process.env.TWITTER_ACCESS_TOKEN;
@@ -91,42 +93,42 @@ export class TweetResolver {
           Authorization: `Bearer ${access_token}`,
         },
       });
+      // if no errors found, return the tweet, else return null
+      if (!tweetRes.data.errors) {
+        const pollOptions: any[] =
+          tweetRes.data.includes?.polls &&
+          tweetRes.data.includes?.polls[0].options;
+        const tweet = tweetRes.data.data;
 
-      const pollOptions: any[] =
-        tweetRes.data.includes?.polls &&
-        tweetRes.data.includes?.polls[0].options;
+        const {
+          text,
+          id,
+          attachments,
+          public_metrics: {
+            like_count: likes,
+            retweet_count: retweets,
+            reply_count: replies,
+          },
+        } = tweet;
 
-      const tweet = tweetRes.data.data;
-
-      const {
-        text,
-        id,
-        attachments,
-        public_metrics: {
-          like_count: likes,
-          retweet_count: retweets,
-          reply_count: replies,
-        },
-      } = tweet;
-      // console.log(tweetRes.data.includes.media);
-
-      const user = tweetRes.data.includes.users[0];
-      return {
-        url: url.split("?")[0],
-        text,
-        id,
-        attachments,
-        likes,
-        user,
-        retweets,
-        replies,
-        pollOptions,
-        media: tweetRes.data.includes.media,
-      };
+        const user = tweetRes.data.includes.users[0];
+        return {
+          url: url.split("?")[0],
+          text,
+          id,
+          attachments,
+          likes,
+          user,
+          retweets,
+          replies,
+          pollOptions,
+          media: tweetRes.data.includes.media,
+        };
+      } else {
+        throw new Error("tweet not found");
+      }
     } catch (e: any) {
-      console.log("ERROR: ", e.response.data.errors);
-      console.log("ERROR: ", e.response.data.errors[0].parameters);
-      return "error";
+      return null;
     }
   }
 
@@ -162,7 +164,7 @@ export class TweetResolver {
         where: { userId: "f101e13e-863b-4b5b-a23d-62e3874db00e" },
       });
 
-      const result = await getTweetsHelper(tweets, redis);
+      const result = await getTweetsHelper(tweets, redis, prisma);
 
       return result;
     } catch (e) {

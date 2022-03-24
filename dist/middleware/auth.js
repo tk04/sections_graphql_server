@@ -8,7 +8,6 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth = async ({ context }, next) => {
     const { prisma, req } = context;
     const token = req.cookies.token;
-    console.log("cookies: ", req.cookies);
     if (token) {
         try {
             const userId = jsonwebtoken_1.default.decode(token)

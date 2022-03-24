@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 export const auth: MiddlewareFn<context> = async ({ context }, next) => {
   const { prisma, req } = context;
   const token = req.cookies.token;
-  console.log("cookies: ", req.cookies);
+
   if (token) {
     try {
       const userId = (jwt.decode(token) as jwt.JwtPayload & { userId: string })
